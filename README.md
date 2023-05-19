@@ -1,3 +1,6 @@
+![workflow](https://github.com/afgallo/mongocruise/actions/workflows/main.yml/badge.svg)
+[![codecov](https://codecov.io/gh/afgallo/mongocruise/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/afgallo/mongocruise)
+
 # Mongocruise
 
 _"A smooth, trouble-free journey through your MongoDB collections with simple RESTful APIs."_
@@ -18,7 +21,7 @@ npm install mongocruise
 
 ## Prerequisites
 
-This plugin requires a MongoDB connection registered on the server using the `mongokai` Hapi.js plugin. The connection is exposed via a property `server.mongo.db`.
+This plugin requires a MongoDB connection registered on the server using the `mongokai` Hapi.js [plugin](https://github.com/afgallo/mongokai). The connection is exposed via a property `server.mongo.db`.
 
 ## Usage
 
@@ -67,7 +70,7 @@ For `find` operations, query parameters such as `skip`, `limit`, `sort`, `projec
 }
 ```
 
-This route configuration would use the `findOne` operation on the `users` collection, using the `id` route parameter to find a specific user.
+This route configuration would use the `findOne` operation on the `users` collection, using the `_id` route parameter to find a specific user.
 
 ## Error Handling
 
