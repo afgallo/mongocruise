@@ -1,5 +1,5 @@
 ![workflow](https://github.com/afgallo/mongocruise/actions/workflows/main.yml/badge.svg)
-[![codecov](https://codecov.io/gh/afgallo/mongocruise/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/afgallo/mongocruise)
+[![codecov](https://codecov.io/gh/afgallo/mongocruise/branch/main/graph/badge.svg?token=JNSHLDP2DD)](https://codecov.io/gh/afgallo/mongocruise)
 
 # Mongocruise
 
