@@ -1,0 +1,44 @@
+{
+  "name": "mongocruise",
+  "version": "1.0.0",
+  "description": "A smooth, trouble-free journey through your MongoDB collections with simple RESTful APIs.",
+  "author": "Andre Gallo <afgallo@gmail.com>",
+  "repository": "git://github.com/afgallo/mongocruise",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "lab -a @hapi/code -L -l -t 100",
+    "test:ci": "lab -a @hapi/code -L -l -t 100 -r lcov -o lcov.info",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@hapi/boom": "10.0.x",
+    "joi": ">=17.9.x"
+  },
+  "devDependencies": {
+    "@hapi/code": "9.x.x",
+    "@hapi/eslint-plugin": "6.x.x",
+    "@hapi/hapi": "21.x.x",
+    "@hapi/lab": "25.x.x",
+    "eslint": "8.x.x",
+    "eslint-config-prettier": "8.x.x",
+    "eslint-config-standard": "17.x.x",
+    "eslint-plugin-prettier": "4.x.x",
+    "prettier": "2.x.x",
+    "sinon": "15.x.x"
+  },
+  "peerDependencies": {
+    "mongokai": ">= 1.0.x"
+  },
+  "keywords": [
+    "hapi",
+    "mongo",
+    "nosql",
+    "rest",
+    "routes"
+  ]
+}

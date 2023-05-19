@@ -1,0 +1,23 @@
+{
+  "extends": ["plugin:@hapi/recommended", "plugin:prettier/recommended", "standard"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "script",
+    "ecmaFeatures": {
+      "impliedStrict": true
+    }
+  },
+  "rules": {
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "semi": ["error", "never"],
+    "strict": ["error", "never"],
+    "@hapi/scope-start": "off",
+    "brace-style": [1, "1tbs", { "allowSingleLine": true }],
+    "no-console": "error",
+    "no-unreachable": "error",
+    "no-debugger": "error",
+    "arrow-parens": "off",
+    "no-unused-vars": ["warn", { "vars": "all" }],
+    "space-before-function-paren": "off"
+  }
+}
