@@ -12,10 +12,22 @@ describe('mongocruise - helpers', () => {
     expect(result.options.skip).to.be.a.number().and.to.equal(10)
   })
 
+  it('should handle undefined "skip" query parameter', () => {
+    const request = { skip: undefined }
+    const result = buildQueryRequest(request)
+    expect(result.options.skip).to.be.a.number().and.to.equal(0)
+  })
+
   it('should handle "limit" query parameter', () => {
     const request = { limit: '5' }
     const result = buildQueryRequest(request)
     expect(result.options.limit).to.be.a.number().and.to.equal(5)
+  })
+
+  it('should handle undefined "limit" query parameter', () => {
+    const request = { limit: null }
+    const result = buildQueryRequest(request)
+    expect(result.options.limit).to.be.a.number().and.to.equal(25)
   })
 
   it('should handle "sort" query parameter', () => {
