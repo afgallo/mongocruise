@@ -27,7 +27,10 @@
     "eslint": "8.x.x",
     "eslint-config-prettier": "8.x.x",
     "eslint-config-standard": "17.x.x",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.0.0",
     "eslint-plugin-prettier": "4.x.x",
+    "eslint-plugin-promise": "^6.1.1",
     "prettier": "2.x.x",
     "sinon": "15.x.x"
   },
