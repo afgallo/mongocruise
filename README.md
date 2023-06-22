@@ -51,6 +51,7 @@ The `mongocruise` handler supports the following options:
 - `collection`: The MongoDB collection to use.
 - `operation`: The MongoDB operation to perform. Can be one of `find`, `findOne`, `insertOne`, `updateOne`, or `deleteOne`.
 - `queryParam`: The parameter to use for `findOne`, `updateOne`, and `deleteOne` operations.
+- `setTimestamps`: The flag to add `createdAt` or `updatedAt` on the create and update operations.
 
 For `find` operations, query parameters such as `skip`, `limit`, `sort`, `projection`, and `find` can be passed directly in the request. These parameters should be in JSON format.
 
