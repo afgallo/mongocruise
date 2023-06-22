@@ -1,6 +1,6 @@
 {
   "name": "mongocruise",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A smooth, trouble-free journey through your MongoDB collections with simple RESTful APIs.",
   "author": "Andre Gallo <afgallo@gmail.com>",
   "repository": "git://github.com/afgallo/mongocruise",
