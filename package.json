@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@hapi/boom": "10.0.x",
-    "joi": ">=17.9.x"
+    "joi": ">=17.10.0"
   },
   "devDependencies": {
     "@hapi/code": "9.x.x",
