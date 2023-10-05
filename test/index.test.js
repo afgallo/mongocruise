@@ -62,7 +62,13 @@ describe('mongocruise - plugin', () => {
     plugin.register(serverMock)
 
     const handler = serverMock.decorate.args[0][2]({ params: { id: '123' } }, handlerOptions)
-    const result = await handler({ params: { id: '123' } }, serverMock)
+    const result = await handler(
+      {
+        params: { id: '123' },
+        query: { projection: '{"displayName": 1}' }
+      },
+      serverMock
+    )
 
     expect(serverMock.mongo.db.collection.calledWith('users')).to.be.true()
     expect(serverMock.mongo.db.findOne.calledOnce).to.be.true()
@@ -195,6 +201,33 @@ describe('mongocruise - plugin', () => {
 
     try {
       await handler({ query: { find: '{"invalidJson": value}' } }, serverMock)
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(400)
+    }
+  })
+
+  it('throws an error for invalid findOne query', async () => {
+    const handlerOptions = {
+      collection: 'users',
+      operation: 'findOne',
+      queryParam: 'id'
+    }
+
+    plugin.register(serverMock)
+
+    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
+
+    try {
+      await handler(
+        {
+          params: {
+            id: '123'
+          },
+          query: { find: '{"invalidJson": value}' }
+        },
+        serverMock
+      )
     } catch (error) {
       expect(error.isBoom).to.be.true()
       expect(error.output.statusCode).to.be.equal(400)
