@@ -2,6 +2,7 @@ const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const Sinon = require('sinon')
 const { plugin } = require('../lib')
+const { runHandlerWith } = require('./helpers')
 const { MongoClient, ObjectId } = require('mongodb')
 const { MongoMemoryServer } = require('mongodb-memory-server')
 
@@ -53,130 +54,82 @@ describe('mongocruise - plugin', () => {
   })
 
   it('correctly calls the find operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'find'
-    }
+    const result = await runHandlerWith(serverMock, { collection: 'users', operation: 'find' }, { query: {} })
 
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-    const result = await handler({ query: {} }, serverMock)
-
-    expect(result).to.be.an.array()
-    expect(result.length).to.equal(2)
+    expect(result).to.be.an.array().and.to.have.length(2)
     expect(result[0].name).to.equal('John')
   })
 
   it('correctly calls the findOne operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'findOne',
-      queryParam: '_id'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[0]._id } }, handlerOptions)
-    const result = await handler({ params: { _id: mockedUsers[0]._id } }, serverMock)
-
+    const userId = mockedUsers[0]._id
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'findOne', queryParam: '_id' },
+      { params: { _id: userId } }
+    )
     expect(result).to.be.an.object()
     expect(result.name).to.equal('John')
   })
 
   it('correctly calls the findOne operation with a projection', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'findOne',
-      queryParam: '_id'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[0]._id } }, handlerOptions)
-    const result = await handler(
-      { params: { _id: mockedUsers[0]._id }, query: { projection: JSON.stringify({ _id: true }) } },
-      serverMock
+    const userId = mockedUsers[0]._id
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'findOne', queryParam: '_id' },
+      { params: { _id: userId }, query: { projection: JSON.stringify({ _id: true }) } }
     )
-
     expect(result).to.be.an.object()
     expect(result.name).to.not.exist()
   })
 
   it('correctly calls the insertOne operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'insertOne'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-    const result = await handler({ payload: { name: 'Anderson' } }, serverMock)
-
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'insertOne' },
+      { payload: { name: 'Anderson' } }
+    )
     expect(result).to.be.an.object()
     expect(result.name).to.equal('Anderson')
   })
 
   it('adds createdAt and updatedAt on the insertOne operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'insertOne'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-    const result = await handler({ payload: { name: 'Leila' } }, serverMock)
-
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'insertOne' },
+      { payload: { name: 'Leila' } }
+    )
     expect(result).to.be.an.object()
     expect(Object.keys(result)).to.equal(['_id', 'name', 'createdAt', 'updatedAt'])
   })
 
   it('omits createdAt and updatedAt on the insertOne operation if setTimestamps is set to false', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'insertOne',
-      setTimestamps: false
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-    const result = await handler({ payload: { name: 'John' } }, serverMock)
-
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'insertOne', setTimestamps: false },
+      { payload: { name: 'John' } }
+    )
     expect(result).to.be.an.object()
     expect(Object.keys(result)).to.equal(['_id', 'name'])
   })
 
   it('correctly calls the updateOne operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'updateOne',
-      queryParam: '_id'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[0]._id } }, handlerOptions)
-    const result = await handler({ params: { _id: mockedUsers[0]._id }, payload: { name: 'Updated John' } }, serverMock)
-
+    const userId = mockedUsers[0]._id
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'updateOne', queryParam: '_id' },
+      { params: { _id: userId }, payload: { name: 'Updated John' } }
+    )
     expect(result.acknowledged).to.be.true()
     expect(result.modifiedCount).to.be.greaterThan(0)
   })
 
   it('adds updatedAt on the updateOne operation', async () => {
-    const updateHandlerOptions = {
-      collection: 'users',
-      operation: 'updateOne',
-      queryParam: '_id'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[0]._id } }, updateHandlerOptions)
-    const result = await handler({ params: { _id: mockedUsers[0]._id }, payload: { name: 'New Name' } }, serverMock)
-
+    const userId = mockedUsers[0]._id
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'updateOne', queryParam: '_id' },
+      { params: { _id: userId }, payload: { name: 'New Name' } }
+    )
     expect(result.acknowledged).to.be.true()
     expect(result.modifiedCount).to.be.greaterThan(0)
 
@@ -186,55 +139,38 @@ describe('mongocruise - plugin', () => {
   })
 
   it('omits updatedAt on the updateOne operation if setTimestamps is set to false', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'updateOne',
-      queryParam: '_id',
-      setTimestamps: false
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[0]._id } }, handlerOptions)
-    const result = await handler({ params: { _id: mockedUsers[0]._id }, payload: { name: 'Omitted' } }, serverMock)
-
+    const userId = mockedUsers[0]._id
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'updateOne', queryParam: '_id', setTimestamps: false },
+      { params: { _id: userId }, payload: { name: 'Omitted' } }
+    )
     expect(result.acknowledged).to.be.true()
     expect(result.modifiedCount).to.be.greaterThan(0)
 
-    const updatedDocument = await db.collection('users').findOne({ _id: mockedUsers[0]._id })
-
+    const updatedDocument = await db.collection('users').findOne({ _id: userId })
     expect(updatedDocument).to.be.an.object()
     expect(updatedDocument.updatedAt).to.not.exist()
   })
 
   it('correctly calls the deleteOne operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'deleteOne',
-      queryParam: '_id'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[1]._id } }, handlerOptions)
-    const result = await handler({ params: { _id: mockedUsers[1]._id } }, serverMock)
-
+    const userId = mockedUsers[1]._id
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'deleteOne', queryParam: '_id' },
+      { params: { _id: userId } }
+    )
     expect(result.acknowledged).to.be.true()
     expect(result.deletedCount).to.be.greaterThan(0)
   })
 
   it('throws an error for invalid query', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'find'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-
     try {
-      await handler({ query: { find: '{"invalidJson": value}' } }, serverMock)
+      await runHandlerWith(
+        serverMock,
+        { collection: 'users', operation: 'find' },
+        { query: { find: '{"invalidJson": value}' } }
+      )
     } catch (error) {
       expect(error.isBoom).to.be.true()
       expect(error.output.statusCode).to.be.equal(400)
@@ -242,25 +178,11 @@ describe('mongocruise - plugin', () => {
   })
 
   it('throws an error for invalid findOne query', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'findOne',
-      queryParam: 'id'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-
     try {
-      await handler(
-        {
-          params: {
-            id: '123'
-          },
-          query: { find: '{"invalidJson": value}' }
-        },
-        serverMock
+      await runHandlerWith(
+        serverMock,
+        { collection: 'users', operation: 'findOne', queryParam: 'id' },
+        { params: { id: '123' }, query: { find: '{"invalidJson": value}' } }
       )
     } catch (error) {
       expect(error.isBoom).to.be.true()
@@ -269,17 +191,8 @@ describe('mongocruise - plugin', () => {
   })
 
   it('throws an error for unsupported operation', async () => {
-    const handlerOptions = {
-      collection: 'users',
-      operation: 'unsupportedOperation'
-    }
-
-    plugin.register(serverMock)
-
-    const handler = serverMock.decorate.args[0][2]({}, handlerOptions)
-
     try {
-      await handler({}, serverMock)
+      await runHandlerWith(serverMock, { collection: 'users', operation: 'unsupportedOperation' }, {})
     } catch (error) {
       expect(error.message).to.be.equal('Invaid MongoDB operation passed in: unsupportedOperation')
     }
