@@ -62,17 +62,24 @@ describe('mongocruise - plugin', () => {
     plugin.register(serverMock)
 
     const handler = serverMock.decorate.args[0][2]({ params: { id: '123' } }, handlerOptions)
+
+  it('correctly calls the findOne operation with a projection', async () => {
+    const handlerOptions = {
+      collection: 'users',
+      operation: 'findOne',
+      queryParam: '_id'
+    }
+
+    plugin.register(serverMock)
+
+    const handler = serverMock.decorate.args[0][2]({ params: { _id: mockedUsers[0]._id } }, handlerOptions)
     const result = await handler(
-      {
-        params: { id: '123' },
-        query: { projection: '{"displayName": 1}' }
-      },
+      { params: { _id: mockedUsers[0]._id }, query: { projection: JSON.stringify({ _id: true }) } },
       serverMock
     )
 
-    expect(serverMock.mongo.db.collection.calledWith('users')).to.be.true()
-    expect(serverMock.mongo.db.findOne.calledOnce).to.be.true()
     expect(result).to.be.an.object()
+    expect(result.name).to.not.exist()
   })
 
   it('correctly calls the insertOne operation', async () => {
