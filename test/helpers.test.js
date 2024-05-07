@@ -27,7 +27,7 @@ describe('mongocruise - helpers', () => {
   it('should handle undefined "limit" query parameter', () => {
     const request = { limit: null }
     const result = buildQueryRequest(request)
-    expect(result.options.limit).to.be.a.number().and.to.equal(25)
+    expect(result.options.limit).to.be.a.number().and.to.equal(0)
   })
 
   it('should handle "sort" query parameter', () => {
