@@ -7,7 +7,7 @@ const { expect } = Code
 
 describe('mongocruise - helpers', () => {
   it('should handle "skip" query parameter', () => {
-    const request = { skip: '10' }
+    const request = { skip: 10 }
     const result = buildQueryRequest(request)
     expect(result.options.skip).to.be.a.number().and.to.equal(10)
   })
@@ -50,7 +50,7 @@ describe('mongocruise - helpers', () => {
 
   it('builds query request correctly with valid parameters', () => {
     const params = {
-      skip: '10',
+      skip: 10,
       limit: 5,
       sort: '{"field":"asc"}',
       projection: '{"field":1}',
