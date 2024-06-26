@@ -1,6 +1,7 @@
 const Lab = require('@hapi/lab')
 const Code = require('@hapi/code')
 const { buildQueryRequest } = require('../lib/helpers')
+const { ObjectId } = require('mongodb')
 
 const { describe, it } = (exports.lab = Lab.script())
 const { expect } = Code
@@ -46,6 +47,18 @@ describe('mongocruise - helpers', () => {
     const request = { find: '{"status": "active"}' }
     const result = buildQueryRequest(request)
     expect(result.query).to.equal({ status: 'active' })
+  })
+
+  it('should convert _id to ObjectId automatically', () => {
+    const request = { find: '{"_id": "663d67b980370ea81825a41a"}' }
+    const result = buildQueryRequest(request)
+    expect(result.query._id instanceof ObjectId).to.equal(true)
+  })
+
+  it('should convert _id in $in to ObjectId automatically', () => {
+    const request = { find: '{"_id": { "$in": ["663d67b980370ea81825a41a"] }}' }
+    const result = buildQueryRequest(request)
+    expect(result.query._id.$in[0] instanceof ObjectId).to.equal(true)
   })
 
   it('builds query request correctly with valid parameters', () => {
