@@ -190,6 +190,92 @@ describe('mongocruise - plugin', () => {
     }
   })
 
+  it('correctly calls the aggregate operation with a pipeline as a function', async () => {
+    const pipeline = (request) => [{ $match: { name: request.query.name } }, { $project: { _id: 1, name: 1 } }]
+
+    const result = await runHandlerWith(
+      serverMock,
+      { collection: 'users', operation: 'aggregate', pipeline },
+      { query: { name: 'John' } }
+    )
+
+    expect(result).to.be.an.array().and.to.have.length(1)
+    expect(result[0].name).to.equal('John')
+  })
+
+  it('throws an error when the pipeline is not sent in the request', async () => {
+    const expectedErrorWhenPipelineIsUndefined = 'Aggregation pipeline must be a function'
+    try {
+      await runHandlerWith(serverMock, { collection: 'users', operation: 'aggregate' }, {})
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(400)
+      expect(error.message).to.include(expectedErrorWhenPipelineIsUndefined)
+    }
+  })
+
+  it('throws an error when the pipeline is not a function', async () => {
+    const pipelineThatIsNotAFunction = [{ $match: { name: 'John' } }]
+    try {
+      await runHandlerWith(
+        serverMock,
+        { collection: 'users', operation: 'aggregate', pipeline: pipelineThatIsNotAFunction },
+        {}
+      )
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(400)
+      expect(error.message).to.include('Aggregation pipeline must be a function')
+    }
+  })
+
+  it('throws an error when the function does not return an array', async () => {
+    const invalidPipeline = () => ({ $match: { name: 'John' } })
+
+    try {
+      await runHandlerWith(serverMock, { collection: 'users', operation: 'aggregate', pipeline: invalidPipeline }, {})
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(400)
+      expect(error.message).to.include('Invalid aggregation pipeline')
+    }
+  })
+
+  it('throws an error when the pipeline is not provided', async () => {
+    const expectedErrorWhenPipelineIsNotProvided = 'Aggregation pipeline must be a function'
+    try {
+      await runHandlerWith(serverMock, { collection: 'users', operation: 'aggregate' }, {})
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(400)
+      expect(error.message).to.include(expectedErrorWhenPipelineIsNotProvided)
+    }
+  })
+
+  it('throws an error when the function returns null', async () => {
+    const nullPipeline = () => null
+
+    try {
+      await runHandlerWith(serverMock, { collection: 'users', operation: 'aggregate', pipeline: nullPipeline }, {})
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(400)
+      expect(error.message).to.include('Invalid aggregation pipeline')
+    }
+  })
+
+  it('returns a mongo error to the user', async () => {
+    const invalidPipeline = () => [{ $invalidStage: { invalidField: 'invalidValue' } }]
+
+    try {
+      await runHandlerWith(serverMock, { collection: 'users', operation: 'aggregate', pipeline: invalidPipeline }, {})
+    } catch (error) {
+      expect(error.isBoom).to.be.true()
+      expect(error.output.statusCode).to.be.equal(500)
+      expect(error.message).to.include('MongoDB error')
+    }
+  })
+
   it('throws an error for unsupported operation', async () => {
     try {
       await runHandlerWith(serverMock, { collection: 'users', operation: 'unsupportedOperation' }, {})

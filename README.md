@@ -11,7 +11,7 @@ Mongocruise is a flexible, user-friendly plugin for the Hapi.js server framework
 
 - Easily define CRUD operations in your Hapi.js routes.
 - Flexible route parameters that leverage MongoDB's search capabilities.
-- Supports various MongoDB operations including `find`, `findOne`, `insertOne`, `updateOne`, and `deleteOne`.
+- Supports various MongoDB operations including `find`, `findOne`, `insertOne`, `updateOne`, `deleteOne`, and `aggregate` for more advanced queries.
 
 ## Installation
 
@@ -46,16 +46,38 @@ await server.register(require('mongocruise'))
 }
 ```
 
+For aggregate operations, the pipeline option must be a function that returns an array representing the aggregation pipeline:
+
+```javascript
+{
+  method: 'GET',
+  path: '/aggregatedUsers',
+  handler: {
+    mongocruise: {
+      collection: 'users',
+      operation: 'aggregate',
+      pipeline: (request) => [
+        { $match: { age: { $gte: 18 } } },
+        { $group: { _id: null, total: { $sum: 1 } } }
+      ]
+    }
+  }
+}
+```
+
 The `mongocruise` handler supports the following options:
 
 - `collection`: The MongoDB collection to use.
-- `operation`: The MongoDB operation to perform. Can be one of `find`, `findOne`, `insertOne`, `updateOne`, or `deleteOne`.
+- `operation`: The MongoDB operation to perform. Can be one of `find`, `findOne`, `insertOne`, `updateOne`, `deleteOne`, or `aggregate`.
 - `queryParam`: The parameter to use for `findOne`, `updateOne`, and `deleteOne` operations.
 - `setTimestamps`: The flag to add `createdAt` or `updatedAt` on the create and update operations.
+- `pipeline`: A function that returns an array representing the aggregation pipeline for `aggregate` operations.
 
 For `find` operations, query parameters such as `skip`, `limit`, `sort`, `projection`, and `find` can be passed directly in the request. These parameters should be in JSON format.
 
 ## Example
+
+### Simple Query Example
 
 ```javascript
 {
@@ -72,6 +94,40 @@ For `find` operations, query parameters such as `skip`, `limit`, `sort`, `projec
 ```
 
 This route configuration would use the `findOne` operation on the `users` collection, using the `_id` route parameter to find a specific user.
+
+### Aggregation Example
+
+```javascript
+{
+  method: 'GET',
+  path: '/todos',
+  handler: {
+    mongocruise: {
+      collection: 'todos',
+      operation: 'aggregate',
+      pipeline: (request) => [
+        { $match: { author: request.query.userId } },
+        { $facet: {
+            totalTodos: [{ $count: "count" }],
+            todos: [
+              { $skip: request.query.skip || 0 },
+              { $limit: request.query.limit || 10 },
+              { $project: { _id: 1, title: 1 } }
+            ]
+          }
+        },
+        { $project: {
+            totalTodos: { $arrayElemAt: ["$totalTodos.count", 0] },
+            todos: 1
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+Note that `pipeline` is a function. This is required since we need to pass down the `request` values to the pipeline to support dynamic values.
 
 ## Error Handling
 
